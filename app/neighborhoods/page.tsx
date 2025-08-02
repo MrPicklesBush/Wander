@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import SearchBar from '@/components/SearchBar'
 import NeighborhoodCard from '@/components/NeighborhoodCard'
-import MapPlaceholder from '@/components/MapPlaceholder'
 import { FiList, FiMap } from 'react-icons/fi'
 import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
+import Map from '@/components/Map'
 
 export default function NeighborhoodsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
@@ -75,7 +75,7 @@ export default function NeighborhoodsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm">
-            <MapPlaceholder />
+            <Map/>
           </div>
         )}
       </div>
