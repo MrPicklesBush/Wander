@@ -2,21 +2,7 @@
 
 import { useState } from 'react'
 import { FiStar, FiTag, FiPlus } from 'react-icons/fi'
-
-// Mock neighborhoods for dropdown
-const mockNeighborhoods = [
-  'Mission District',
-  'Bernal Heights',
-  'Castro',
-  'Chinatown',
-  'Hayes Valley',
-  'Marina District',
-  'Nob Hill',
-  'Outer Richmond',
-  'Potrero Hill',
-  'Russian Hill',
-  'South of Market'
-]
+import { sfNeighborhoods } from '@/data/sf-neighborhoods'
 
 // Pre-defined tags
 const predefinedTags = [
@@ -24,7 +10,7 @@ const predefinedTags = [
 ]
 
 export default function WriteReviewPage() {
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState('Mission District')
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState('mission-district')
   const [rating, setRating] = useState(5)
   const [reviewText, setReviewText] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -99,9 +85,9 @@ export default function WriteReviewPage() {
                 onChange={(e) => setSelectedNeighborhood(e.target.value)}
                 className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               >
-                {mockNeighborhoods.map((neighborhood) => (
-                  <option key={neighborhood} value={neighborhood}>
-                    {neighborhood}
+                {sfNeighborhoods.map((neighborhood) => (
+                  <option key={neighborhood.id} value={neighborhood.slug}>
+                    {neighborhood.name}
                   </option>
                 ))}
               </select>

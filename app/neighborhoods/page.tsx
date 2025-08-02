@@ -5,29 +5,15 @@ import SearchBar from '@/components/SearchBar'
 import NeighborhoodCard from '@/components/NeighborhoodCard'
 import MapPlaceholder from '@/components/MapPlaceholder'
 import { FiList, FiMap } from 'react-icons/fi'
-
-// Mock data for demonstration
-const mockNeighborhoods = [
-  { id: 1, name: 'Bernal Heights', rating: 4.2, status: 'good', reviews: 45 },
-  { id: 2, name: 'Castro', rating: 4.1, status: 'good', reviews: 38 },
-  { id: 3, name: 'Chinatown', rating: 3.5, status: 'average', reviews: 52 },
-  { id: 4, name: 'Hayes Valley', rating: 4.3, status: 'good', reviews: 29 },
-  { id: 5, name: 'Marina District', rating: 4.0, status: 'good', reviews: 41 },
-  { id: 6, name: 'Mission', rating: 2.8, status: 'poor', reviews: 67 },
-  { id: 7, name: 'Nob Hill', rating: 3.7, status: 'average', reviews: 33 },
-  { id: 8, name: 'Outer Richmond', rating: 4.1, status: 'good', reviews: 24 },
-  { id: 9, name: 'Potrero Hill', rating: 3.6, status: 'average', reviews: 31 },
-  { id: 10, name: 'Russian Hill', rating: 4.0, status: 'good', reviews: 28 },
-  { id: 11, name: 'South of Market', rating: 2.9, status: 'poor', reviews: 43 },
-]
+import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
 
 export default function NeighborhoodsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredNeighborhoods = mockNeighborhoods.filter(neighborhood =>
-    neighborhood.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredNeighborhoods = searchQuery 
+    ? searchNeighborhoods(searchQuery)
+    : sfNeighborhoods
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,6 +57,13 @@ export default function NeighborhoodsPage() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-gray-600">
+            Showing {filteredNeighborhoods.length} of {sfNeighborhoods.length} neighborhoods
+          </p>
         </div>
 
         {/* Content */}
