@@ -17,7 +17,7 @@ export default function HomePage() {
             </h1>
             
             {/* Search Bar */}
-            <div className="max-w-md mx-auto mb-12">
+            <div className="max-w-md mx-auto mb-12 relative z-10">
               <SearchBar placeholder="Search by neighborhood name..." />
             </div>
             
