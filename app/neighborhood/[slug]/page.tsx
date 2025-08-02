@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { FiStar, FiMapPin, FiMessageSquare, FiTag, FiArrowLeft } from 'react-icons/fi'
 import MapPlaceholder from '@/components/MapPlaceholder'
@@ -38,9 +38,13 @@ const mockReviews = [
 export default function NeighborhoodProfilePage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const slug = params.slug as string
   const neighborhood = getNeighborhoodBySlug(slug)
   const [reviews, setReviews] = useState(mockReviews)
+
+  // Check if user came from map view
+  const fromMap = searchParams.get('from') === 'map'
 
   // Load reviews from localStorage on component mount
   useEffect(() => {
@@ -66,6 +70,17 @@ export default function NeighborhoodProfilePage() {
     loadReviews()
   }, [slug])
 
+  // Handle back navigation
+  const handleBackNavigation = () => {
+    if (fromMap) {
+      // If user came from map view, go back to map view
+      router.push('/neighborhoods?view=map')
+    } else {
+      // Otherwise go to default list view
+      router.push('/neighborhoods')
+    }
+  }
+
   if (!neighborhood) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -73,7 +88,7 @@ export default function NeighborhoodProfilePage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Not Found</h1>
           <p className="text-gray-600 mb-6">The neighborhood you're looking for doesn't exist.</p>
           <button
-            onClick={() => router.push('/neighborhoods')}
+            onClick={handleBackNavigation}
             className="btn-secondary"
           >
             <FiArrowLeft className="w-4 h-4 mr-2" />
@@ -119,7 +134,7 @@ export default function NeighborhoodProfilePage() {
         {/* Back Button */}
         <div className="mb-6">
           <button
-            onClick={() => router.push('/neighborhoods')}
+            onClick={handleBackNavigation}
             className="flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200"
           >
             <FiArrowLeft className="w-4 h-4 mr-2" />

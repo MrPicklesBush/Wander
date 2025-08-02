@@ -1,15 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import NeighborhoodCard from '@/components/NeighborhoodCard'
 import { FiList, FiMap } from 'react-icons/fi'
 import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
-import Map from '@/components/Map'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for Map component to avoid SSR issues
+const DynamicMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function NeighborhoodsPage() {
+  const searchParams = useSearchParams()
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Check if we should default to map view based on URL parameter
+  useEffect(() => {
+    const viewParam = searchParams.get('view')
+    if (viewParam === 'map') {
+      setViewMode('map')
+    }
+  }, [searchParams])
 
   const filteredNeighborhoods = searchQuery 
     ? searchNeighborhoods(searchQuery)
@@ -75,7 +88,7 @@ export default function NeighborhoodsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm">
-            <Map/>
+            <DynamicMap />
           </div>
         )}
       </div>
