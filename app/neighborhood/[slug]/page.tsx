@@ -1,7 +1,7 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-import { FiStar, FiMapPin, FiMessageSquare, FiTag } from 'react-icons/fi'
+import { useParams, useRouter } from 'next/navigation'
+import { FiStar, FiMapPin, FiMessageSquare, FiTag, FiArrowLeft } from 'react-icons/fi'
 import MapPlaceholder from '@/components/MapPlaceholder'
 import ReviewCard from '@/components/ReviewCard'
 import { getNeighborhoodBySlug } from '@/data/sf-neighborhoods'
@@ -36,6 +36,7 @@ const mockReviews = [
 
 export default function NeighborhoodProfilePage() {
   const params = useParams()
+  const router = useRouter()
   const slug = params.slug as string
   const neighborhood = getNeighborhoodBySlug(slug)
 
@@ -44,7 +45,14 @@ export default function NeighborhoodProfilePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Not Found</h1>
-          <p className="text-gray-600">The neighborhood you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">The neighborhood you're looking for doesn't exist.</p>
+          <button
+            onClick={() => router.push('/neighborhoods')}
+            className="btn-secondary"
+          >
+            <FiArrowLeft className="w-4 h-4 mr-2" />
+            Back to Browse Neighborhoods
+          </button>
         </div>
       </div>
     )
@@ -82,6 +90,17 @@ export default function NeighborhoodProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => router.push('/neighborhoods')}
+            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-200"
+          >
+            <FiArrowLeft className="w-4 h-4 mr-2" />
+            Back to Browse Neighborhoods
+          </button>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
