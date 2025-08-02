@@ -8,7 +8,11 @@ import type { Feature } from "geojson";
 import type { Layer } from "leaflet";
 import { sfNeighborhoods } from "@/data/sf-neighborhoods";
 
-export default function MapComponent() {
+interface MapComponentProps {
+  height?: string;
+}
+
+export default function MapComponent({ height = "h-96" }: MapComponentProps) {
   const [geoData, setGeoData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,7 +84,9 @@ export default function MapComponent() {
               ).join('') || ''}
             </div>
             <a href="/neighborhood/${neighborhoodData.slug}?from=map" 
-               class="inline-block w-full text-center bg-primary-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-700 transition-colors duration-200">
+               style="display: inline-block; width: 100%; text-align: center; background-color: #2563eb; color: white; padding: 12px 16px; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none;"
+               onmouseover="this.style.backgroundColor='#1d4ed8'"
+               onmouseout="this.style.backgroundColor='#2563eb'">
               View Details
             </a>
           </div>
@@ -93,7 +99,9 @@ export default function MapComponent() {
             <h3 class="text-lg font-bold text-gray-900 mb-2">${districtName}</h3>
             <p class="text-sm text-gray-600 mb-3">Neighborhood information coming soon!</p>
             <a href="/neighborhoods" 
-               class="inline-block w-full text-center bg-primary-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-700 transition-colors duration-200">
+               style="display: inline-block; width: 100%; text-align: center; background-color: #2563eb; color: white; padding: 12px 16px; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none;"
+               onmouseover="this.style.backgroundColor='#1d4ed8'"
+               onmouseout="this.style.backgroundColor='#2563eb'">
               Browse All Neighborhoods
             </a>
           </div>
@@ -113,7 +121,7 @@ export default function MapComponent() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+      <div className={`flex items-center justify-center ${height} bg-gray-100 rounded-lg`}>
         <div className="text-gray-600">Loading map...</div>
       </div>
     );
@@ -122,14 +130,14 @@ export default function MapComponent() {
   // Show error state
   if (error) {
     return (
-      <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+      <div className={`flex items-center justify-center ${height} bg-gray-100 rounded-lg`}>
         <div className="text-red-600">Error loading map: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="h-96 w-full rounded-lg overflow-hidden">
+    <div className={`${height} w-full rounded-lg overflow-hidden`}>
       <MapContainer
         center={[37.7749, -122.4194]}
         zoom={12}

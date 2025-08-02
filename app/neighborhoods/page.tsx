@@ -88,7 +88,7 @@ export default function NeighborhoodsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm">
-            <DynamicMap />
+            <DynamicMap height="h-[600px]" />
           </div>
         )}
       </div>
