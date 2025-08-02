@@ -6,7 +6,7 @@ import { FiStar, FiMapPin, FiMessageSquare, FiTag, FiArrowLeft } from 'react-ico
 import MapPlaceholder from '@/components/MapPlaceholder'
 import ReviewCard from '@/components/ReviewCard'
 import { getNeighborhoodBySlug } from '@/data/sf-neighborhoods'
-
+import Map from '@/components/Map' 
 // Mock reviews data (fallback)
 const mockReviews = [
   {
@@ -174,7 +174,7 @@ export default function NeighborhoodProfilePage() {
 
         {/* Map Section */}
         <div className="mb-8">
-          <MapPlaceholder />
+          <Map neighborhoodSlug={slug} />
         </div>
 
         {/* Tags Section */}

@@ -12,7 +12,7 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-gray-900">RateMyHood</span>
+            <span className="text-2xl font-bold text-gray-900">Wander</span>
           </Link>
 
           {/* Navigation Links */}

@@ -6,16 +6,36 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import type { Feature } from "geojson";
 import type { Layer } from "leaflet";
-import { sfNeighborhoods } from "@/data/sf-neighborhoods";
+import { sfNeighborhoods, getNeighborhoodBySlug } from "@/data/sf-neighborhoods";
 
 interface MapComponentProps {
   height?: string;
+  neighborhoodSlug?: string;
 }
 
-export default function MapComponent({ height = "h-96" }: MapComponentProps) {
+export default function MapComponent({ height = "h-96", neighborhoodSlug }: MapComponentProps) {
   const [geoData, setGeoData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([37.7749, -122.4194]);
+  const [mapZoom, setMapZoom] = useState(12);
+
+  // Set map center and zoom based on neighborhood
+  useEffect(() => {
+    if (neighborhoodSlug) {
+      const neighborhood = getNeighborhoodBySlug(neighborhoodSlug);
+      if (neighborhood && neighborhood.coordinates) {
+        // Center on the neighborhood coordinates
+        setMapCenter([neighborhood.coordinates.lat, neighborhood.coordinates.lng]);
+        setMapZoom(14); // Zoom level to see full neighborhood outline
+        
+        // Small delay to ensure map centers properly after data loads
+        setTimeout(() => {
+          setMapCenter([neighborhood.coordinates.lat, neighborhood.coordinates.lng]);
+        }, 100);
+      }
+    }
+  }, [neighborhoodSlug]);
 
   useEffect(() => {
     const fetchGeoData = async () => {
@@ -139,8 +159,8 @@ export default function MapComponent({ height = "h-96" }: MapComponentProps) {
   return (
     <div className={`${height} w-full rounded-lg overflow-hidden`}>
       <MapContainer
-        center={[37.7749, -122.4194]}
-        zoom={12}
+        center={mapCenter}
+        zoom={mapZoom}
         style={{ height: "100%", width: "100%" }}
         className="rounded-lg"
       >
