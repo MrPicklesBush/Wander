@@ -1,12 +1,13 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { FiStar, FiMapPin, FiMessageSquare, FiTag, FiArrowLeft } from 'react-icons/fi'
 import MapPlaceholder from '@/components/MapPlaceholder'
 import ReviewCard from '@/components/ReviewCard'
 import { getNeighborhoodBySlug } from '@/data/sf-neighborhoods'
 
-// Mock reviews data (this would come from your backend)
+// Mock reviews data (fallback)
 const mockReviews = [
   {
     id: 1,
@@ -39,6 +40,31 @@ export default function NeighborhoodProfilePage() {
   const router = useRouter()
   const slug = params.slug as string
   const neighborhood = getNeighborhoodBySlug(slug)
+  const [reviews, setReviews] = useState(mockReviews)
+
+  // Load reviews from localStorage on component mount
+  useEffect(() => {
+    const loadReviews = () => {
+      try {
+        const storedReviews = JSON.parse(localStorage.getItem('wanderReviews') || '[]')
+        const neighborhoodReviews = storedReviews.filter((review: any) => 
+          review.neighborhood === slug
+        )
+        
+        // Combine stored reviews with mock reviews if no stored reviews exist
+        if (neighborhoodReviews.length > 0) {
+          setReviews(neighborhoodReviews)
+        } else {
+          setReviews(mockReviews)
+        }
+      } catch (error) {
+        console.error('Error loading reviews:', error)
+        setReviews(mockReviews)
+      }
+    }
+
+    loadReviews()
+  }, [slug])
 
   if (!neighborhood) {
     return (
@@ -158,15 +184,24 @@ export default function NeighborhoodProfilePage() {
               <FiMessageSquare className="w-5 h-5 text-gray-400 mr-2" />
               <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
             </div>
-            <button className="btn-primary">
-              Write Details
+            <button 
+              onClick={() => router.push(`/write?neighborhood=${slug}`)}
+              className="btn-primary"
+            >
+              Write a Review
             </button>
           </div>
           
           <div className="space-y-4">
-            {mockReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No reviews yet. Be the first to write a review!</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
