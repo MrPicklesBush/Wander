@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import SearchBar from '@/components/SearchBar'
-import MapPlaceholder from '@/components/MapPlaceholder'
+import dynamic from 'next/dynamic'
 
 export default function HomePage() {
+
+  const DynamicMap = dynamic(() => import("@/components/Map"), { ssr: false });
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -20,7 +23,7 @@ export default function HomePage() {
             
             {/* Interactive Map Placeholder */}
             <div className="mb-12">
-              <MapPlaceholder />
+              <DynamicMap />
             </div>
             
             {/* CTA Buttons */}
@@ -37,4 +40,4 @@ export default function HomePage() {
       </section>
     </div>
   )
-} 
+}
