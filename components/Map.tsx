@@ -138,6 +138,18 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug }: MapC
     fillOpacity: 0     // Line thickness
   };
 
+  // Helper to get fill color based on rating
+  const getFillColor = (districtName: string) => {
+    const neighborhood = findNeighborhoodData(districtName);
+    const rating = neighborhood?.avgRating;
+    if (rating === undefined) return "#e5e7eb"; // gray for unknown
+
+    if (rating < 3) return "#ef4444"; // red
+    if (rating > 3 && rating < 4) return "#facc15"; // yellow
+    if (rating >= 4) return "#22c55e"; // green
+    return "#e5e7eb";
+  };
+
   // Show loading state
   if (isLoading) {
     return (
@@ -172,7 +184,23 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug }: MapC
           <GeoJSON
             data={geoData}
             onEachFeature={onEachDistrict}
-            style={geoJSONStyle}
+            style={feature => {
+              if (!feature || !feature.properties) {
+                return {
+                  color: "#3388ff",
+                  weight: 2,
+                  fillColor: "#e5e7eb",
+                  fillOpacity: 0.5
+                };
+              }
+              const districtName = feature.properties.name || feature.properties.DISTRICT || "Unknown";
+              return {
+                color: "#3388ff",
+                weight: 2,
+                fillColor: getFillColor(districtName),
+                fillOpacity: 0.5
+              };
+            }}
           />
         )}
       </MapContainer>
