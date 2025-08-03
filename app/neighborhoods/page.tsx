@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import NeighborhoodCard from '@/components/NeighborhoodCard'
 import { FiList, FiMap } from 'react-icons/fi'
@@ -16,16 +16,37 @@ const DynamicMap = dynamic(() => import("@/components/Map"), {
 
 export default function NeighborhoodsPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  
+  // Start with list view as default, will be updated by useEffect
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Check if we should default to map view based on URL parameter
+  // Update view mode when URL parameters change
   useEffect(() => {
     const viewParam = searchParams.get('view')
     if (viewParam === 'map') {
       setViewMode('map')
+    } else if (viewParam === 'list' || !viewParam) {
+      setViewMode('list')
     }
   }, [searchParams])
+
+  // Function to handle view mode changes
+  const handleViewModeChange = (newViewMode: 'list' | 'map') => {
+    setViewMode(newViewMode)
+    
+    // Update URL without page reload
+    const params = new URLSearchParams(searchParams.toString())
+    if (newViewMode === 'map') {
+      params.set('view', 'map')
+    } else {
+      params.delete('view')
+    }
+    
+    const newUrl = `${window.location.pathname}?${params.toString()}`
+    router.replace(newUrl, { scroll: false })
+  }
 
   const filteredNeighborhoods = searchQuery 
     ? searchNeighborhoods(searchQuery)
@@ -59,7 +80,7 @@ export default function NeighborhoodsPage() {
             {/* View Toggle */}
             <div className="flex bg-white rounded-lg border border-gray-200 p-1">
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => handleViewModeChange('list')}
                 className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   viewMode === 'list'
                     ? 'bg-primary-600 text-white'
@@ -70,7 +91,7 @@ export default function NeighborhoodsPage() {
                 List View
               </button>
               <button
-                onClick={() => setViewMode('map')}
+                onClick={() => handleViewModeChange('map')}
                 className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   viewMode === 'map'
                     ? 'bg-primary-600 text-white'
