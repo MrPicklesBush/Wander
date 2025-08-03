@@ -11,20 +11,24 @@ import { sfNeighborhoods, getNeighborhoodBySlug } from "@/data/sf-neighborhoods"
 interface MapComponentProps {
   height?: string;
   neighborhoodSlug?: string;
+  searchNeighborhood?: string; // New prop for search functionality
 }
 
-export default function MapComponent({ height = "h-96", neighborhoodSlug }: MapComponentProps) {
+export default function MapComponent({ height = "h-96", neighborhoodSlug, searchNeighborhood }: MapComponentProps) {
   const [geoData, setGeoData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState<[number, number]>([37.7749, -122.4194]);
   const [mapZoom, setMapZoom] = useState(12);
 
-  // Set map center and zoom based on neighborhood
+  // Set map center and zoom based on neighborhood or search
   useEffect(() => {
+    console.log('Map useEffect triggered:', { neighborhoodSlug, searchNeighborhood })
+    
     if (neighborhoodSlug) {
       const neighborhood = getNeighborhoodBySlug(neighborhoodSlug);
       if (neighborhood && neighborhood.coordinates) {
+        console.log('Zooming to neighborhood slug:', neighborhood.name)
         // Center on the neighborhood coordinates
         setMapCenter([neighborhood.coordinates.lat, neighborhood.coordinates.lng]);
         setMapZoom(14); // Zoom level to see full neighborhood outline
@@ -34,8 +38,32 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug }: MapC
           setMapCenter([neighborhood.coordinates.lat, neighborhood.coordinates.lng]);
         }, 100);
       }
+    } else if (searchNeighborhood && searchNeighborhood.trim()) {
+      console.log('Searching for neighborhood:', searchNeighborhood)
+      // Find neighborhood by search query
+      const neighborhood = sfNeighborhoods.find(n => 
+        n.name.toLowerCase().includes(searchNeighborhood.toLowerCase()) ||
+        searchNeighborhood.toLowerCase().includes(n.name.toLowerCase())
+      );
+      
+      if (neighborhood && neighborhood.coordinates) {
+        console.log('Found and zooming to:', neighborhood.name, neighborhood.coordinates)
+        setMapCenter([neighborhood.coordinates.lat, neighborhood.coordinates.lng]);
+        setMapZoom(14);
+        
+        // Small delay to ensure map centers properly after data loads
+        setTimeout(() => {
+          setMapCenter([neighborhood.coordinates.lat, neighborhood.coordinates.lng]);
+        }, 100);
+      } else {
+        console.log('No neighborhood found for search:', searchNeighborhood)
+      }
+    } else {
+      // Reset to default view if no search or neighborhood
+      setMapCenter([37.7749, -122.4194]);
+      setMapZoom(12);
     }
-  }, [neighborhoodSlug]);
+  }, [neighborhoodSlug, searchNeighborhood]);
 
   useEffect(() => {
     const fetchGeoData = async () => {

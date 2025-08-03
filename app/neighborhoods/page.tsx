@@ -9,7 +9,10 @@ import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for Map component to avoid SSR issues
-const DynamicMap = dynamic(() => import("@/components/Map"), { ssr: false });
+const DynamicMap = dynamic(() => import("@/components/Map"), { 
+  ssr: false,
+  loading: () => <div className="h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>
+});
 
 export default function NeighborhoodsPage() {
   const searchParams = useSearchParams()
@@ -28,6 +31,11 @@ export default function NeighborhoodsPage() {
     ? searchNeighborhoods(searchQuery)
     : sfNeighborhoods
 
+  // Debug logging
+  useEffect(() => {
+    console.log('Search query changed:', searchQuery)
+  }, [searchQuery])
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -40,7 +48,11 @@ export default function NeighborhoodsPage() {
             <div className="flex-1 max-w-md">
               <SearchBar 
                 placeholder="Search by neighborhood name..." 
-                onSearch={setSearchQuery}
+                onSearch={(query) => {
+                  console.log('SearchBar onSearch called with:', query)
+                  setSearchQuery(query)
+                }}
+                disableNavigation={true}
               />
             </div>
             
@@ -88,7 +100,11 @@ export default function NeighborhoodsPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm">
-            <DynamicMap height="h-[600px]" />
+            <DynamicMap 
+              key={searchQuery} // Force re-render when search changes
+              height="h-[600px]" 
+              searchNeighborhood={searchQuery || undefined}
+            />
           </div>
         )}
       </div>

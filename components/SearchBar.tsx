@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { FiSearch, FiChevronDown } from 'react-icons/fi'
+import { FiSearch, FiChevronDown, FiX } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
 import { sfNeighborhoods } from '@/data/sf-neighborhoods'
 import { createPortal } from 'react-dom'
@@ -9,9 +9,10 @@ import { createPortal } from 'react-dom'
 interface SearchBarProps {
   placeholder?: string
   onSearch?: (query: string) => void
+  disableNavigation?: boolean // New prop to disable navigation
 }
 
-export default function SearchBar({ placeholder = "Search...", onSearch }: SearchBarProps) {
+export default function SearchBar({ placeholder = "Search...", onSearch, disableNavigation = false }: SearchBarProps) {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -53,8 +54,20 @@ export default function SearchBar({ placeholder = "Search...", onSearch }: Searc
   const handleNeighborhoodSelect = (neighborhood: typeof sfNeighborhoods[0]) => {
     setQuery(neighborhood.name)
     setIsDropdownOpen(false)
-    // Navigate to the neighborhood profile page
-    router.push(`/neighborhood/${neighborhood.slug}`)
+    
+    // Only navigate if navigation is not disabled
+    if (!disableNavigation) {
+      router.push(`/neighborhood/${neighborhood.slug}`)
+    } else {
+      // Just update the search query for map zoom functionality
+      onSearch?.(neighborhood.name)
+    }
+  }
+
+  const handleClear = () => {
+    setQuery('')
+    setIsDropdownOpen(false)
+    onSearch?.('')
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -114,8 +127,17 @@ export default function SearchBar({ placeholder = "Search...", onSearch }: Searc
             }}
             onFocus={() => setIsDropdownOpen(true)}
             placeholder={placeholder}
-            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors duration-200"
+            className="w-full pl-10 pr-16 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors duration-200"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="absolute inset-y-0 right-8 flex items-center pr-2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <FiX className="w-4 h-4" />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
