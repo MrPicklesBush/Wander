@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FiStar, FiTag, FiPlus, FiX, FiChevronDown, FiSearch, FiArrowLeft } from 'react-icons/fi'
 import { sfNeighborhoods } from '@/data/sf-neighborhoods'
@@ -11,7 +11,7 @@ const predefinedTags = [
   'Safe', 'Walkable', 'Dirty', 'Noisy', 'Friendly', 'Food', 'Artsy', 'Parking', 'Transportation', 'Nightlife'
 ]
 
-export default function WriteReviewPage() {
+function WriteReviewContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const neighborhoodParam = searchParams.get('neighborhood')
@@ -397,5 +397,13 @@ export default function WriteReviewPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function WriteReviewPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <WriteReviewContent />
+    </Suspense>
   )
 } 
