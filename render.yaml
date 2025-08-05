@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: wander-ratemyhood
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+    buildFilter:
+      paths:
+        - app/**
+        - components/**
+        - data/**
+        - lib/**
+        - package.json
+        - tsconfig.json
+        - tailwind.config.js
+        - postcss.config.js 
