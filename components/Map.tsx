@@ -12,9 +12,17 @@ interface MapComponentProps {
   height?: string;
   neighborhoodSlug?: string;
   searchNeighborhood?: string; // New prop for search functionality
+  reviewCounts?: Record<string, number>; // Actual review counts from Firebase
+  averageRatings?: Record<string, number>; // Actual average ratings from Firebase
 }
 
-export default function MapComponent({ height = "h-96", neighborhoodSlug, searchNeighborhood }: MapComponentProps) {
+export default function MapComponent({ 
+  height = "h-96", 
+  neighborhoodSlug, 
+  searchNeighborhood,
+  reviewCounts = {},
+  averageRatings = {}
+}: MapComponentProps) {
   const [geoData, setGeoData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,11 +107,49 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
 
   // Helper function to find neighborhood data by name
   const findNeighborhoodData = (name: string) => {
-    return sfNeighborhoods.find(neighborhood => 
-      neighborhood.name.toLowerCase().includes(name.toLowerCase()) ||
-      name.toLowerCase().includes(neighborhood.name.toLowerCase())
-    );
-  };
+    console.log('Map looking for neighborhood:', name)
+    
+    // Try exact match first
+    let neighborhood = sfNeighborhoods.find(n => 
+      n.name.toLowerCase() === name.toLowerCase()
+    )
+    
+    if (neighborhood) {
+      console.log('Found exact match:', neighborhood.name)
+      return neighborhood
+    }
+    
+    // Try partial match
+    neighborhood = sfNeighborhoods.find(n => 
+      n.name.toLowerCase().includes(name.toLowerCase()) ||
+      name.toLowerCase().includes(n.name.toLowerCase())
+    )
+    
+    if (neighborhood) {
+      console.log('Found partial match:', neighborhood.name, 'for', name)
+      return neighborhood
+    }
+    
+    // Special cases for common mismatches
+    const specialCases: Record<string, string> = {
+      'Golden Gate Park': 'Golden Gate Park',
+      'Golden Gate': 'Golden Gate Park',
+      'Ggp': 'Golden Gate Park',
+      'Gg Park': 'Golden Gate Park'
+    }
+    
+    const specialCase = specialCases[name]
+    if (specialCase) {
+      neighborhood = sfNeighborhoods.find(n => n.name === specialCase)
+      if (neighborhood) {
+        console.log('Found special case match:', neighborhood.name, 'for', name)
+        return neighborhood
+      }
+    }
+    
+    console.log('No match found for:', name)
+    return null
+  }
 
   // Helper function to render stars as HTML string
   const renderStarsHTML = (rating: number) => {
@@ -118,19 +164,34 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
   const onEachDistrict = (feature: Feature, layer: Layer) => {
     if (feature.properties) {
       const districtName = feature.properties.name || feature.properties.DISTRICT || "Unknown";
+      console.log('Map district found:', districtName)
+      
       const neighborhoodData = findNeighborhoodData(districtName);
       
       if (neighborhoodData) {
+        // Get actual data from Firebase
+        const actualReviewCount = reviewCounts[neighborhoodData.slug] || 0;
+        const actualAverageRating = averageRatings[neighborhoodData.slug] || 0;
+        
+        console.log('Neighborhood data found:', {
+          name: neighborhoodData.name,
+          slug: neighborhoodData.slug,
+          actualReviewCount,
+          actualAverageRating,
+          reviewCounts,
+          averageRatings
+        })
+        
         const popupContent = `
           <div class="p-4 max-w-xs">
             <h3 class="text-lg font-bold text-gray-900 mb-2">${neighborhoodData.name}</h3>
             <div class="flex items-center mb-3">
               <div class="flex text-sm">
-                ${renderStarsHTML(neighborhoodData.avgRating || 0)}
+                ${renderStarsHTML(actualAverageRating)}
               </div>
               <span class="ml-2 text-sm text-gray-600">
-                ${neighborhoodData.avgRating ? neighborhoodData.avgRating.toFixed(1) : 'N/A'} 
-                (${neighborhoodData.reviewCount || 0} reviews)
+                ${actualAverageRating > 0 ? actualAverageRating.toFixed(1) : 'N/A'} 
+                (${actualReviewCount} reviews)
               </span>
             </div>
             <div class="mb-3">
@@ -151,20 +212,72 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
         `;
         layer.bindPopup(popupContent);
       } else {
-        // Fallback for neighborhoods not in our data
-        const popupContent = `
-          <div class="p-4 max-w-xs">
-            <h3 class="text-lg font-bold text-gray-900 mb-2">${districtName}</h3>
-            <p class="text-sm text-gray-600 mb-3">Neighborhood information coming soon!</p>
-            <a href="/neighborhoods" 
-               style="display: inline-block; width: 100%; text-align: center; background-color: #2563eb; color: white; padding: 12px 16px; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none;"
-               onmouseover="this.style.backgroundColor='#1d4ed8'"
-               onmouseout="this.style.backgroundColor='#2563eb'">
-              Browse All Neighborhoods
-            </a>
-          </div>
-        `;
-        layer.bindPopup(popupContent);
+        // Check if this district name matches the current neighborhood (for profile pages)
+        const currentNeighborhood = sfNeighborhoods.find(n => n.slug === neighborhoodSlug);
+        if (currentNeighborhood && (
+          districtName.toLowerCase().includes(currentNeighborhood.name.toLowerCase()) ||
+          currentNeighborhood.name.toLowerCase().includes(districtName.toLowerCase())
+        )) {
+          // This is the current neighborhood on the profile page
+          const actualReviewCount = reviewCounts[currentNeighborhood.slug] || 0;
+          const actualAverageRating = averageRatings[currentNeighborhood.slug] || 0;
+          
+          console.log('Current neighborhood match:', {
+            name: currentNeighborhood.name,
+            slug: currentNeighborhood.slug,
+            districtName,
+            actualReviewCount,
+            actualAverageRating,
+            reviewCounts,
+            averageRatings
+          })
+          
+          const popupContent = `
+            <div class="p-4 max-w-xs">
+              <h3 class="text-lg font-bold text-gray-900 mb-2">${currentNeighborhood.name}</h3>
+              <div class="flex items-center mb-3">
+                <div class="flex text-sm">
+                  ${renderStarsHTML(actualAverageRating)}
+                </div>
+                <span class="ml-2 text-sm text-gray-600">
+                  ${actualAverageRating > 0 ? actualAverageRating.toFixed(1) : 'N/A'} 
+                  (${actualReviewCount} reviews)
+                </span>
+              </div>
+              <div class="mb-3">
+                <p class="text-sm text-gray-700 line-clamp-2">${currentNeighborhood.description}</p>
+              </div>
+              <div class="flex flex-wrap gap-1 mb-3">
+                ${currentNeighborhood.characteristics?.slice(0, 3).map(char => 
+                  `<span class="px-2 py-1 text-xs bg-primary-100 text-primary-800 rounded-full">${char}</span>`
+                ).join('') || ''}
+              </div>
+              <a href="/neighborhood/${currentNeighborhood.slug}?from=map" 
+                 style="display: inline-block; width: 100%; text-align: center; background-color: #2563eb; color: white; padding: 12px 16px; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none;"
+                 onmouseover="this.style.backgroundColor='#1d4ed8'"
+                 onmouseout="this.style.backgroundColor='#2563eb'">
+                View Details
+              </a>
+            </div>
+          `;
+          layer.bindPopup(popupContent);
+        } else {
+          console.log('No match found for district:', districtName, 'current slug:', neighborhoodSlug)
+          // Fallback for neighborhoods not in our data
+          const popupContent = `
+            <div class="p-4 max-w-xs">
+              <h3 class="text-lg font-bold text-gray-900 mb-2">${districtName}</h3>
+              <p class="text-sm text-gray-600 mb-3">Neighborhood information coming soon!</p>
+              <a href="/neighborhoods" 
+                 style="display: inline-block; width: 100%; text-align: center; background-color: #2563eb; color: white; padding: 12px 16px; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none;"
+                 onmouseover="this.style.backgroundColor='#1d4ed8'"
+                 onmouseout="this.style.backgroundColor='#2563eb'">
+                Browse All Neighborhoods
+              </a>
+            </div>
+          `;
+          layer.bindPopup(popupContent);
+        }
       }
     }
   };

@@ -93,4 +93,66 @@ export const getReviewCounts = async (): Promise<Record<string, number>> => {
     console.error('Error getting review counts from Firebase:', error)
     return {}
   }
+}
+
+// Get average ratings for all neighborhoods
+export const getAverageRatings = async (): Promise<Record<string, number>> => {
+  try {
+    console.log('Getting average ratings from Firebase')
+    
+    const querySnapshot = await getDocs(collection(db, 'reviews'))
+    const ratings: Record<string, { total: number; count: number }> = {}
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      const neighborhood = data.neighborhood
+      const rating = data.rating
+      
+      if (neighborhood && rating) {
+        if (!ratings[neighborhood]) {
+          ratings[neighborhood] = { total: 0, count: 0 }
+        }
+        ratings[neighborhood].total += rating
+        ratings[neighborhood].count += 1
+      }
+    })
+    
+    // Calculate averages
+    const averages: Record<string, number> = {}
+    Object.keys(ratings).forEach(neighborhood => {
+      const { total, count } = ratings[neighborhood]
+      averages[neighborhood] = total / count
+    })
+    
+    console.log('Average ratings:', averages)
+    return averages
+  } catch (error) {
+    console.error('Error getting average ratings from Firebase:', error)
+    return {}
+  }
+}
+
+// Get all reviews for debugging
+export const getAllReviews = async (): Promise<Review[]> => {
+  try {
+    console.log('Getting all reviews from Firebase')
+    
+    const querySnapshot = await getDocs(collection(db, 'reviews'))
+    const reviews: Review[] = []
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      console.log('Review found:', { id: doc.id, neighborhood: data.neighborhood, rating: data.rating })
+      reviews.push({
+        id: doc.id,
+        ...data
+      } as Review)
+    })
+    
+    console.log('All reviews:', reviews)
+    return reviews
+  } catch (error) {
+    console.error('Error getting all reviews from Firebase:', error)
+    return []
+  }
 } 

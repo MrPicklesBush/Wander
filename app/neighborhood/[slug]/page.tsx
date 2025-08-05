@@ -106,6 +106,16 @@ export default function NeighborhoodProfilePage() {
   // Calculate actual review count from loaded reviews
   const actualReviewCount = reviews.length
 
+  // Calculate average rating from actual reviews
+  const calculateAverageRating = () => {
+    if (reviews.length === 0) return 0
+    
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
+    return totalRating / reviews.length
+  }
+
+  const averageRating = calculateAverageRating()
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -132,13 +142,13 @@ export default function NeighborhoodProfilePage() {
           </p>
           
           <div className="flex items-center mb-4">
-            {neighborhood.avgRating && (
+            {averageRating > 0 && (
               <>
                 <div className="flex items-center mr-4">
-                  {renderStars(neighborhood.avgRating)}
+                  {renderStars(averageRating)}
                 </div>
                 <span className="text-lg text-gray-600 mr-2">
-                  {neighborhood.avgRating.toFixed(1)}
+                  {averageRating.toFixed(1)}
                 </span>
               </>
             )}
@@ -150,7 +160,11 @@ export default function NeighborhoodProfilePage() {
 
         {/* Map Section */}
         <div className="mb-8">
-          <DynamicMap neighborhoodSlug={slug} />
+          <DynamicMap 
+            neighborhoodSlug={slug} 
+            reviewCounts={{ [slug]: actualReviewCount }}
+            averageRatings={{ [slug]: averageRating }}
+          />
         </div>
 
         {/* Tags Section */}

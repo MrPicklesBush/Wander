@@ -6,7 +6,7 @@ import SearchBar from '@/components/SearchBar'
 import NeighborhoodCard from '@/components/NeighborhoodCard'
 import { FiList, FiMap } from 'react-icons/fi'
 import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
-import { getReviewCounts } from '@/lib/reviewService'
+import { getReviewCounts, getAverageRatings } from '@/lib/reviewService'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for Map component to avoid SSR issues
@@ -23,24 +23,29 @@ export default function NeighborhoodsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [reviewCounts, setReviewCounts] = useState<Record<string, number>>({})
+  const [averageRatings, setAverageRatings] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
 
-  // Load review counts from Firebase
+  // Load review counts and average ratings from Firebase
   useEffect(() => {
-    const loadReviewCounts = async () => {
+    const loadData = async () => {
       try {
         setLoading(true)
-        const counts = await getReviewCounts()
+        const [counts, ratings] = await Promise.all([
+          getReviewCounts(),
+          getAverageRatings(),
+        ])
         setReviewCounts(counts)
+        setAverageRatings(ratings)
       } catch (error) {
-        console.error('Error loading review counts:', error)
+        console.error('Error loading data:', error)
         setReviewCounts({})
+        setAverageRatings({})
       } finally {
         setLoading(false)
       }
     }
-
-    loadReviewCounts()
+    loadData()
   }, [])
 
   // Update view mode when URL parameters change
@@ -141,6 +146,7 @@ export default function NeighborhoodsPage() {
                 key={neighborhood.id} 
                 neighborhood={neighborhood}
                 actualReviewCount={loading ? 0 : (reviewCounts[neighborhood.slug] || 0)}
+                averageRating={loading ? 0 : (averageRatings[neighborhood.slug] || 0)}
               />
             ))}
           </div>
@@ -150,6 +156,8 @@ export default function NeighborhoodsPage() {
               key={searchQuery} // Force re-render when search changes
               height="h-[600px]" 
               searchNeighborhood={searchQuery || undefined}
+              reviewCounts={reviewCounts}
+              averageRatings={averageRatings}
             />
           </div>
         )}

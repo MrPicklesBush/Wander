@@ -5,9 +5,10 @@ import { SFNeighborhood } from '@/data/sf-neighborhoods'
 interface NeighborhoodCardProps {
   neighborhood: SFNeighborhood
   actualReviewCount?: number // New prop for actual review count
+  averageRating?: number // New prop for actual average rating
 }
 
-export default function NeighborhoodCard({ neighborhood, actualReviewCount }: NeighborhoodCardProps) {
+export default function NeighborhoodCard({ neighborhood, actualReviewCount, averageRating }: NeighborhoodCardProps) {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'good':
@@ -85,10 +86,10 @@ export default function NeighborhoodCard({ neighborhood, actualReviewCount }: Ne
         
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
-            {renderStars(neighborhood.avgRating)}
-            {neighborhood.avgRating && (
+            {renderStars(averageRating)}
+            {averageRating && (
               <span className="text-sm text-gray-600 ml-2">
-                {neighborhood.avgRating.toFixed(1)}
+                {averageRating.toFixed(1)}
               </span>
             )}
           </div>
