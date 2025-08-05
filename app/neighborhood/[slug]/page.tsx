@@ -6,34 +6,14 @@ import { FiStar, FiMapPin, FiMessageSquare, FiTag, FiArrowLeft } from 'react-ico
 import MapPlaceholder from '@/components/MapPlaceholder'
 import ReviewCard from '@/components/ReviewCard'
 import { getNeighborhoodBySlug } from '@/data/sf-neighborhoods'
-import Map from '@/components/Map' 
-// Mock reviews data (fallback)
-const mockReviews = [
-  {
-    id: 1,
-    rating: 3,
-    text: 'Trash is a problem on Valencia but the community is vibrant!',
-    tags: ['Trash', 'Artsy', 'Loud at night'],
-    author: 'Anonymous',
-    date: '2 days ago'
-  },
-  {
-    id: 2,
-    rating: 4,
-    text: 'Great food scene and amazing street art everywhere you look.',
-    tags: ['Artsy', 'Food', 'Walkable'],
-    author: 'Sarah M.',
-    date: '1 week ago'
-  },
-  {
-    id: 3,
-    rating: 2,
-    text: 'Too noisy at night and parking is impossible.',
-    tags: ['Noisy', 'Parking', 'Loud'],
-    author: 'Anonymous',
-    date: '2 weeks ago'
-  }
-]
+import { getReviewsForNeighborhood, Review } from '@/lib/reviewService'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for Map component to avoid SSR issues
+const DynamicMap = dynamic(() => import("@/components/Map"), { 
+  ssr: false,
+  loading: () => <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>
+})
 
 export default function NeighborhoodProfilePage() {
   const params = useParams()
@@ -41,29 +21,24 @@ export default function NeighborhoodProfilePage() {
   const searchParams = useSearchParams()
   const slug = params.slug as string
   const neighborhood = getNeighborhoodBySlug(slug)
-  const [reviews, setReviews] = useState(mockReviews)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Check if user came from map view
   const fromMap = searchParams.get('from') === 'map'
 
-  // Load reviews from localStorage on component mount
+  // Load reviews from Firebase on component mount
   useEffect(() => {
-    const loadReviews = () => {
+    const loadReviews = async () => {
       try {
-        const storedReviews = JSON.parse(localStorage.getItem('wanderReviews') || '[]')
-        const neighborhoodReviews = storedReviews.filter((review: any) => 
-          review.neighborhood === slug
-        )
-        
-        // Combine stored reviews with mock reviews if no stored reviews exist
-        if (neighborhoodReviews.length > 0) {
-          setReviews(neighborhoodReviews)
-        } else {
-          setReviews(mockReviews)
-        }
+        setLoading(true)
+        const neighborhoodReviews = await getReviewsForNeighborhood(slug)
+        setReviews(neighborhoodReviews)
       } catch (error) {
         console.error('Error loading reviews:', error)
-        setReviews(mockReviews)
+        setReviews([])
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -128,6 +103,9 @@ export default function NeighborhoodProfilePage() {
     return stars
   }
 
+  // Calculate actual review count from loaded reviews
+  const actualReviewCount = reviews.length
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -164,17 +142,15 @@ export default function NeighborhoodProfilePage() {
                 </span>
               </>
             )}
-            {neighborhood.reviewCount && (
-              <span className="text-gray-500">
-                {neighborhood.reviewCount} reviews
-              </span>
-            )}
+            <span className="text-gray-500">
+              {actualReviewCount} review{actualReviewCount !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
 
         {/* Map Section */}
         <div className="mb-8">
-          <Map neighborhoodSlug={slug} />
+          <DynamicMap neighborhoodSlug={slug} />
         </div>
 
         {/* Tags Section */}
@@ -208,7 +184,11 @@ export default function NeighborhoodProfilePage() {
           </div>
           
           <div className="space-y-4">
-            {reviews.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>Loading reviews...</p>
+              </div>
+            ) : reviews.length > 0 ? (
               reviews.map((review) => (
                 <ReviewCard key={review.id} review={review} />
               ))

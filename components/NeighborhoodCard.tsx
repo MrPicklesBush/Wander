@@ -4,9 +4,10 @@ import { SFNeighborhood } from '@/data/sf-neighborhoods'
 
 interface NeighborhoodCardProps {
   neighborhood: SFNeighborhood
+  actualReviewCount?: number // New prop for actual review count
 }
 
-export default function NeighborhoodCard({ neighborhood }: NeighborhoodCardProps) {
+export default function NeighborhoodCard({ neighborhood, actualReviewCount }: NeighborhoodCardProps) {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'good':
@@ -62,6 +63,9 @@ export default function NeighborhoodCard({ neighborhood }: NeighborhoodCardProps
     return stars
   }
 
+  // Use actual review count if provided, otherwise fall back to data file count
+  const reviewCount = actualReviewCount !== undefined ? actualReviewCount : neighborhood.reviewCount || 0
+
   return (
     <Link href={`/neighborhood/${neighborhood.slug}`}>
       <div className="card hover:shadow-md transition-shadow duration-200 cursor-pointer">
@@ -88,11 +92,9 @@ export default function NeighborhoodCard({ neighborhood }: NeighborhoodCardProps
               </span>
             )}
           </div>
-          {neighborhood.reviewCount && (
-            <span className="text-sm text-gray-500">
-              {neighborhood.reviewCount} reviews
-            </span>
-          )}
+          <span className="text-sm text-gray-500">
+            {reviewCount} review{reviewCount !== 1 ? 's' : ''}
+          </span>
         </div>
         
         <div className="flex flex-wrap gap-1">

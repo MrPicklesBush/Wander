@@ -6,6 +6,7 @@ import SearchBar from '@/components/SearchBar'
 import NeighborhoodCard from '@/components/NeighborhoodCard'
 import { FiList, FiMap } from 'react-icons/fi'
 import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
+import { getReviewCounts } from '@/lib/reviewService'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for Map component to avoid SSR issues
@@ -21,6 +22,26 @@ export default function NeighborhoodsPage() {
   // Start with list view as default, will be updated by useEffect
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list')
   const [searchQuery, setSearchQuery] = useState('')
+  const [reviewCounts, setReviewCounts] = useState<Record<string, number>>({})
+  const [loading, setLoading] = useState(true)
+
+  // Load review counts from Firebase
+  useEffect(() => {
+    const loadReviewCounts = async () => {
+      try {
+        setLoading(true)
+        const counts = await getReviewCounts()
+        setReviewCounts(counts)
+      } catch (error) {
+        console.error('Error loading review counts:', error)
+        setReviewCounts({})
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadReviewCounts()
+  }, [])
 
   // Update view mode when URL parameters change
   useEffect(() => {
@@ -116,7 +137,11 @@ export default function NeighborhoodsPage() {
         {viewMode === 'list' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredNeighborhoods.map((neighborhood) => (
-              <NeighborhoodCard key={neighborhood.id} neighborhood={neighborhood} />
+              <NeighborhoodCard 
+                key={neighborhood.id} 
+                neighborhood={neighborhood}
+                actualReviewCount={loading ? 0 : (reviewCounts[neighborhood.slug] || 0)}
+              />
             ))}
           </div>
         ) : (

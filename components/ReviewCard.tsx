@@ -1,7 +1,7 @@
 import { FiStar, FiTag } from 'react-icons/fi'
 
 interface Review {
-  id: number
+  id?: string
   rating: number
   text: string
   tags: string[]

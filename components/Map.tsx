@@ -20,9 +20,17 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
   const [isLoading, setIsLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState<[number, number]>([37.7749, -122.4194]);
   const [mapZoom, setMapZoom] = useState(12);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Set map center and zoom based on neighborhood or search
   useEffect(() => {
+    if (!isClient) return;
+    
     console.log('Map useEffect triggered:', { neighborhoodSlug, searchNeighborhood })
     
     if (neighborhoodSlug) {
@@ -63,9 +71,11 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
       setMapCenter([37.7749, -122.4194]);
       setMapZoom(12);
     }
-  }, [neighborhoodSlug, searchNeighborhood]);
+  }, [neighborhoodSlug, searchNeighborhood, isClient]);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     const fetchGeoData = async () => {
       try {
         setIsLoading(true);
@@ -85,7 +95,7 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
     };
 
     fetchGeoData();
-  }, []);
+  }, [isClient]);
 
   // Helper function to find neighborhood data by name
   const findNeighborhoodData = (name: string) => {
@@ -177,6 +187,15 @@ export default function MapComponent({ height = "h-96", neighborhoodSlug, search
     if (rating >= 4) return "#22c55e"; // green
     return "#e5e7eb";
   };
+
+  // Show loading state
+  if (!isClient) {
+    return (
+      <div className={`flex items-center justify-center ${height} bg-gray-100 rounded-lg`}>
+        <div className="text-gray-600">Loading map...</div>
+      </div>
+    );
+  }
 
   // Show loading state
   if (isLoading) {
