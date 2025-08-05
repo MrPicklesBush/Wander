@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { FiSearch, FiChevronDown, FiX } from 'react-icons/fi'
 import { useRouter } from 'next/navigation'
-import { sfNeighborhoods } from '@/data/sf-neighborhoods'
+import { sfNeighborhoods } from '../data/sf-neighborhoods'
 import { createPortal } from 'react-dom'
 
 interface SearchBarProps {

@@ -2,15 +2,15 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import SearchBar from '@/components/SearchBar'
-import NeighborhoodCard from '@/components/NeighborhoodCard'
+import SearchBar from '../../components/SearchBar'
+import NeighborhoodCard from '../../components/NeighborhoodCard'
 import { FiList, FiMap } from 'react-icons/fi'
-import { sfNeighborhoods, searchNeighborhoods } from '@/data/sf-neighborhoods'
-import { getReviewCounts, getAverageRatings } from '@/lib/reviewService'
+import { sfNeighborhoods, searchNeighborhoods } from '../../data/sf-neighborhoods'
+import { getReviewCounts, getAverageRatings } from '../../lib/reviewService'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for Map component to avoid SSR issues
-const DynamicMap = dynamic(() => import("@/components/Map"), { 
+const DynamicMap = dynamic(() => import("../../components/Map"), { 
   ssr: false,
   loading: () => <div className="h-[600px] bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>
 });

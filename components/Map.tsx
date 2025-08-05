@@ -6,7 +6,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import type { Feature } from "geojson";
 import type { Layer } from "leaflet";
-import { sfNeighborhoods, getNeighborhoodBySlug } from "@/data/sf-neighborhoods";
+import { sfNeighborhoods, getNeighborhoodBySlug } from "../data/sf-neighborhoods";
 
 interface MapComponentProps {
   height?: string;

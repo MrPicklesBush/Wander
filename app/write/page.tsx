@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FiStar, FiTag, FiPlus, FiX, FiChevronDown, FiSearch, FiArrowLeft } from 'react-icons/fi'
-import { sfNeighborhoods } from '@/data/sf-neighborhoods'
-import { saveReview } from '@/lib/reviewService'
+import { sfNeighborhoods } from '../../data/sf-neighborhoods'
+import { saveReview } from '../../lib/reviewService'
 
 // Pre-defined tags
 const predefinedTags = [

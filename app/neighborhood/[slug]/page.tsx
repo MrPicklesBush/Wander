@@ -3,14 +3,14 @@
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { FiStar, FiMapPin, FiMessageSquare, FiTag, FiArrowLeft } from 'react-icons/fi'
-import MapPlaceholder from '@/components/MapPlaceholder'
-import ReviewCard from '@/components/ReviewCard'
-import { getNeighborhoodBySlug } from '@/data/sf-neighborhoods'
-import { getReviewsForNeighborhood, Review } from '@/lib/reviewService'
+import MapPlaceholder from '../../../components/MapPlaceholder'
+import ReviewCard from '../../../components/ReviewCard'
+import { getNeighborhoodBySlug } from '../../../data/sf-neighborhoods'
+import { getReviewsForNeighborhood, Review } from '../../../lib/reviewService'
 import dynamic from 'next/dynamic'
 
 // Dynamic import for Map component to avoid SSR issues
-const DynamicMap = dynamic(() => import("@/components/Map"), { 
+const DynamicMap = dynamic(() => import("../../../components/Map"), { 
   ssr: false,
   loading: () => <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">Loading map...</div>
 })

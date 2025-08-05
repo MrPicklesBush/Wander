@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { FiStar, FiMapPin } from 'react-icons/fi'
-import { SFNeighborhood } from '@/data/sf-neighborhoods'
+import { SFNeighborhood } from '../data/sf-neighborhoods'
 
 interface NeighborhoodCardProps {
   neighborhood: SFNeighborhood

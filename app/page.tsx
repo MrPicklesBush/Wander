@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import SearchBar from '@/components/SearchBar'
+import SearchBar from '../components/SearchBar'
 import dynamic from 'next/dynamic'
 
 export default function HomePage() {
 
-  const DynamicMap = dynamic(() => import("@/components/Map"), { ssr: false });
+  const DynamicMap = dynamic(() => import("../components/Map"), { ssr: false });
 
   return (
     <div className="min-h-screen">
